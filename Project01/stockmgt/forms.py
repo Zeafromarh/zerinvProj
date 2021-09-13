@@ -1,0 +1,75 @@
+from django import forms
+from .models import Stock,ReceiptInfo,Category
+from datetime import datetime
+
+class CreateReceiptInfoForm(forms.ModelForm):
+       class Meta:
+           model = ReceiptInfo
+           fields = ['rctno', 'rcttype']
+           
+class CreateCategoryForm(forms.ModelForm):
+       class Meta:
+           model = Category
+           fields = ['name']
+
+class StockCreateForm(forms.ModelForm):
+       class Meta:
+           model = Stock
+           fields = ['rctno','category', 'item_name', 'uom','quantity']
+       
+       def clean_category(self):
+            category = self.cleaned_data.get('category')
+            if not category: #Means if 'category' is blank
+                raise forms.ValidationError('Category cannot be null')
+            
+            # for instance in Stock.objects.all():#Fetched all data from the DB
+            #     if instance.category == category: #Means whatever fetched from the DB is equal to the one we provide in the textfield(we gave above)
+            #         raise forms.ValidationError(str(category) + ' is already created')
+                            
+            return category
+        
+      
+       def clean_item_name(self):
+           item_name = self.cleaned_data.get('item_name')
+           if not item_name:  #Means if 'item_name' is blank
+               raise forms.ValidationError('Item name cannot be null')
+           return item_name
+           
+           
+
+class StockSearchForm(forms.ModelForm):
+    #We put 'required=False' b/c we don't want to make it a mandatory checkbox
+    export_to_CSV = forms.BooleanField(required=False) #For the checkbox to appear above the 'search' btn Unchecked
+    start_date = forms.DateTimeField(required=True) #,initial=datetime.today()
+    end_date = forms.DateTimeField(required=True)#,initial=datetime.now()
+    class Meta:
+        model = Stock
+        fields = ['rctno','category', 'item_name','start_date', 'end_date']
+        
+
+
+class StockUpdateForm(forms.ModelForm):
+       class Meta:
+           model = Stock
+           fields = ['category', 'item_name', 'quantity']
+
+class IssueForm(forms.ModelForm):
+    	class Meta:
+         model = Stock
+         fields = ['issue_quantity', 'issue_to']
+
+
+class ReceiveForm(forms.ModelForm):
+    class Meta:
+        model = Stock
+        fields = ['receive_quantity', 'receive_by']
+        
+
+class ReorderLevelForm(forms.ModelForm):
+    class Meta:
+        model = Stock
+        fields = ['reorder_level']
+
+
+
+
